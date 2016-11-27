@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo 'Starting build'
+#mvn clean install
+
+echo 'Removing ROOT folder'
+#rm -rf /usr/local/tomcat/webapps/ROOT
+
+echo 'Copying to tomcat directory'
+#cp target/*.war /usr/local/tomcat/webapps/ROOT.war
+
+echo 'Starting tomcat'
+cd /usr/local/tomcat/bin
+
+sh startup.sh
+
+echo 'Keep running forever...'
+# actually this should monitor the tomcat process
+# that was started, not that hard but too much to
+# do now
+while true; do sleep 1000; done
