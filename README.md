@@ -1,6 +1,12 @@
 # Delta Service
 The delta service can essentially be put in front of any SPARQL endpoint and will proxy calls to it. Then interested parties can subscribe to different forms of notifications about changes in the SPARQL endpoint.
 
+## To be done
+* make the updates sequential
+* improve the internal triple model (it's a mess now)
+* make certain thing configurable (enpdoints, authorization, ...)
+* sort out the update notification format
+
 ## Configuring
 [needs to be implemented]
 
