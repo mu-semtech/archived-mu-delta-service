@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import delta_service.config.Configuration;
 import delta_service.query.QueryInfo;
 import delta_service.query.QueryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +30,8 @@ public class RootController {
 
   @Inject
   private QueryService queryService;
+
+    private static final Logger log = LoggerFactory.getLogger(RootController.class);
 
   /**
    * initializes the callback service with 2 call back sets (allDifferences and effectiveDifferences)
@@ -106,10 +111,18 @@ public class RootController {
   public ResponseEntity<String> preProcessQuery(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) String body) throws InvalidSPARQLException
   {
     try {
+        String headerString = "";
+       while(request.getHeaderNames().hasMoreElements())
+        {
+            headerString += request.getHeader(request.getHeaderNames().nextElement());
+        }
+        System.out.println("asdfasdfasASDFASDFASD\n" + headerString);
+        log.info("ASDFASDFASDFADSFSADSF\n" + headerString);
 
-        /**
+        /*
          * Getting the query string,... somehow
          */
+
         String queryString;
 
         if (request.getParameterMap().containsKey("query")) {
