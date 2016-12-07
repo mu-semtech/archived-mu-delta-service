@@ -107,21 +107,20 @@ public class RootController {
     return new ResponseEntity<String>("OK", HttpStatus.OK);
   }
 
-
-
-  @RequestMapping(value = "/sparql")
+    /**
+     * TODO: Add more supported content types there is a problem with the text/turtle content-type
+     * TODO: for some reason the StringHttpMessageConverter barfs on it...
+     * @param request
+     * @param response
+     * @param body
+     * @return
+     * @throws InvalidSPARQLException
+     */
+  @RequestMapping(value = "/sparql", produces = {"application/sparql-results+xml", "application/sparql-results+json", "text/html"})
   public ResponseEntity<String> preProcessQuery(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) String body) throws InvalidSPARQLException
   {
     try {
-        String headerString = "";
-       while(request.getHeaderNames().hasMoreElements())
-        {
-            headerString += request.getHeader(request.getHeaderNames().nextElement());
-        }
-        System.out.println("asdfasdfasASDFASDFASD\n" + headerString);
-        log.info("ASDFASDFASDFADSFSADSF\n" + headerString);
-
-        /*
+         /*
          * Getting the query string,... somehow
          */
 
