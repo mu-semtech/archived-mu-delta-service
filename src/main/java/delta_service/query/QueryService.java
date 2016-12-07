@@ -27,8 +27,12 @@ public class QueryService
     public SPARQLService sparqlService;
     private CallBackService callBackService;
 
-    private List<QueryInfo> updateQueries = new ArrayList<QueryInfo>();
-    public List<QueryInfo> processedQueries = new ArrayList<QueryInfo>();
+    private Queue<QueryInfo> updateQueries = new ArrayDeque<QueryInfo>();
+    private List<QueryInfo> processedQueries = new ArrayList<QueryInfo>();
+    private QueryInfo currentQuery = null;
+
+    public List<QueryInfo> getProcessedQueries(){return this.processedQueries;}
+    public QueryInfo getCurrentQuery(){return this.currentQuery;}
 
     private boolean isProcessingUpdateQueries = false;
 
@@ -76,19 +80,20 @@ public class QueryService
     {
         if(this.updateQueries.size() > 0) {
             this.isProcessingUpdateQueries = true;
-            QueryInfo query = this.updateQueries.get(0);
+            this.currentQuery = this.updateQueries.remove(); //get(0);
             try {
-                this.processUpdateQuery(query);
+                this.processUpdateQuery(this.currentQuery);
             }
             catch (Exception e)
             {
+                this.currentQuery.headers.put("ERROR", e.getLocalizedMessage());
                 e.printStackTrace();
             }
             finally {
-                this.updateQueries.remove(query);
-                this.processedQueries.add(query);
+                this.processedQueries.add(this.currentQuery);
+                this.currentQuery = null;
                 if (this.updateQueries.size() > 0) {
-                    this.startProcessingUpdateQueries();
+                    this.processNextQuery();
                 } else {
                     this.isProcessingUpdateQueries = false;
                 }
@@ -98,14 +103,13 @@ public class QueryService
 
     public void startProcessingUpdateQueries()
     {
-        if(/*this.isProcessingUpdateQueries == false*/1 == 1)
+        if(this.isProcessingUpdateQueries == false)
         {
             this.processNextQuery();
         }
     }
 
     public void processUpdateQuery(QueryInfo queryInfo) throws InvalidSPARQLException, IOException {
-//        try {
             // 1. calculate the difference triples (for this we want the state of the DB as before the update)
             SPARQLQuery parsedQuery = queryInfo.query;
             Map<String, DifferenceTriples> diff = this.getDifferenceTriples(parsedQuery);

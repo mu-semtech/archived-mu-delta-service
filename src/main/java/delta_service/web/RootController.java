@@ -188,7 +188,7 @@ public class RootController {
             this.queryService.registerUpdateQuery(queryInfo);
 
             // while it has not been process ... wait
-            while(this.queryService.processedQueries.contains(queryInfo) == false)
+            while(this.queryService.getProcessedQueries().contains(queryInfo) == false)
             {
                 try {
                     Thread.sleep(100);
