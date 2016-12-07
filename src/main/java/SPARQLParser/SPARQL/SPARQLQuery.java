@@ -204,6 +204,14 @@ public class SPARQLQuery
         {
             String next = iterator.next();
 
+            if(typeDone)
+            {
+                if(this.type != Type.UPDATE)
+                {
+                    break;
+                }
+            }
+
             // maybe this is a prefix thingie
             if(next.toLowerCase().equals("prefix"))
             {
@@ -533,5 +541,154 @@ public class SPARQLQuery
             clone.getStatements().add(statement.clone());
 
         return clone;
+    }
+
+    /**
+     * Class method that returns the type of a given query
+     *
+     * TODO: fill out the docs for this method
+     * @param query
+     * @return
+     * @throws InvalidSPARQLException
+     */
+    public static Type extractType(String query) throws InvalidSPARQLException
+    {
+        SplitQuery splitQuery = new SplitQuery(query);
+
+        Iterator<String> it = splitQuery.iterator();
+        SplitQuery.SplitQueryIterator iterator = (SplitQuery.SplitQueryIterator) it;
+
+        boolean prologueDone = false;
+
+        while (iterator.hasNext())
+        {
+            String next = iterator.next();
+
+            // maybe this is a prefix thingie
+            if(next.toLowerCase().equals("prefix"))
+            {
+                if(prologueDone == true)
+                {
+                    throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator)iterator).getCurrentLine() + " near: " + next +
+                            " prefixes have to be declared at the start of the query!");
+                }
+
+                // Prefix line found, the next 3 things will be [prefix] [:] [full-uri]
+                if(!iterator.hasNext())
+                {
+                    throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator)iterator).getCurrentLine() + " near: " + next);
+                }
+
+                String prefix = iterator.next();
+
+                if(!iterator.hasNext())
+                {
+                    throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator)iterator).getCurrentLine() + " near: " + next);
+                }
+
+                if(prefix.endsWith(":"))
+                {
+                    // ok the prefix ends with : so we dont need it from the next
+                    prefix = prefix.substring(0, prefix.length()-1).trim();
+                }
+                else {
+                    // the prefix doesn't end with :, this means that the next thing we take should be the ':'
+                    if (!iterator.next().equals(":")) {
+                        throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator) iterator).getCurrentLine() + " near: " + next + " " + prefix + " Expected a ':'");
+                    }
+                }
+
+                if(!iterator.hasNext())
+                {
+                    throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator)iterator).getCurrentLine() + " near: " + next + " " + prefix + ":");
+                }
+
+                String uri = iterator.next();
+
+                if(!uri.startsWith("<") || !uri.endsWith(">"))
+                {
+                    throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator)iterator).getCurrentLine() + " near: " + next + " " + prefix + ":");
+                }
+
+                continue;
+            }
+
+            // if we get this far then we are no longer parsing prologue stuff
+            prologueDone = true;
+
+            // are we describing a graph?
+            if(next.toLowerCase().equals("from"))
+            {
+                String graph = iterator.next();
+                if(graph.toLowerCase().equals("named"))
+                {
+                    // ok you can have from and from named :)
+                    // thus the graph name follows
+                    graph = iterator.next();
+                }
+                if(!graph.startsWith("<") || !graph.endsWith(">"))
+                {
+                    throw new InvalidSPARQLException("Invalid SPARQL on line: " + iterator.getCurrentLine() + graph + "is not a valid graph name near " + iterator.getPrevious());
+                }
+
+                continue;
+            }
+
+            // we can also describe a graph with "WITH"
+            if(next.toLowerCase().equals("with"))
+            {
+                String graph = iterator.next();
+                if(!graph.startsWith("<") || !graph.endsWith(">"))
+                {
+                    throw new InvalidSPARQLException("Invalid SPARQL on line: " + iterator.getCurrentLine() + graph + "is not a valid graph name near " + iterator.getPrevious());
+                }
+
+                continue;
+            }
+
+
+            // is it a select?
+            if(next.toLowerCase().equals("select"))
+            {
+                return Type.SELECT;
+            }
+
+            // or a construct
+            if(next.toLowerCase().equals("construct"))
+            {
+                return Type.CONSTRUCT;
+            }
+
+            // or a describe
+            if(next.toLowerCase().equals("describe"))
+            {
+                return Type.DESCRIBE;
+            }
+
+            // or an ask
+            if(next.toLowerCase().equals("ask"))
+            {
+                return Type.ASK;
+            }
+
+            // or a delete
+            if(next.toLowerCase().equals("delete"))
+            {
+                return Type.UPDATE;
+            }
+
+            // or a insert
+            if(next.toLowerCase().equals("insert"))
+            {
+                return Type.UPDATE;
+            }
+
+            // oh oh not match found this thing is no SPARQL sir
+            throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator)iterator).getCurrentLine() + " unexpected token: " + next +
+                    " this is not correct SPARQL. When this library is updated I will tell what kind of token I expect");
+
+        }
+        throw new InvalidSPARQLException("Invalid SPARQL: on line " + ((SplitQuery.SplitQueryIterator)iterator).getCurrentLine() + " unexpected token: " + iterator.peekNext() +
+                " this is not correct SPARQL. When this library is updated I will tell what kind of token I expect");
     }
 }

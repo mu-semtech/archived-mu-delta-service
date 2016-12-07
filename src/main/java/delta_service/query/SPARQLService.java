@@ -2,6 +2,7 @@ package delta_service.query;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.org.apache.regexp.internal.RE;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.Update;
@@ -71,6 +72,9 @@ public class SPARQLService
         {
             stringBuilder.append(line + "\n");
         }
+
+        connection.disconnect();
+
         String jsonString = stringBuilder.toString();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -256,6 +260,9 @@ public class SPARQLService
         {
             stringBuilder.append(line + "\n");
         }
+
+        connection.disconnect();
+
         String jsonString = stringBuilder.toString();
 
         ObjectMapper mapper = new ObjectMapper();

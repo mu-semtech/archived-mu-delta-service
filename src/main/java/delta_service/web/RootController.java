@@ -158,20 +158,23 @@ public class RootController {
             headers.put(headerName, request.getHeader(headerName));
         }
 
-        /**
-         * Getting the endpoint URL ... somehow
-         */
-        //String url = "http://localhost:8890/sparql";
-
-        /**
-         * Getting the parsed query object ... somehow
-         */
-        SPARQLQuery parsedQuery = new SPARQLQuery(queryString);
-
-        /**
+        /*
          * if UPDATE then ...
          */
-        if(parsedQuery.getType().equals(SPARQLQuery.Type.UPDATE)) {
+        SPARQLQuery.Type queryType = null;
+        try {
+            queryType = SPARQLQuery.extractType(queryString);
+        }catch(InvalidSPARQLException invalidSPARQLException)
+        {
+            invalidSPARQLException.printStackTrace();
+        }
+        if(queryType.equals(SPARQLQuery.Type.UPDATE)) {
+
+            /*
+             * Getting the parsed query object ... somehow
+             */
+            SPARQLQuery parsedQuery = new SPARQLQuery(queryString);
+
             // prepare the query object
             QueryInfo queryInfo = new QueryInfo();
             queryInfo.headers = headers;
