@@ -364,8 +364,6 @@ public class SPARQLQuery
                     " this is not correct SPARQL. When this library is updated I will tell what kind of token I expect");
 
         }
-
-        System.out.println("PARSED!!");
     }
 
     /**

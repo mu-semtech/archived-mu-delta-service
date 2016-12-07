@@ -147,7 +147,7 @@ public class RootController {
             }
         }
 
-        /**
+        /*
          * Getting the headers ... somehow
          */
         Map<String, String> headers = new HashMap<String, String>();

@@ -157,7 +157,7 @@ public class QueryService
         // the deltas for each query will be stored in a map the projects each graph on a differenceTriples object
         Map<String, DifferenceTriples> differenceTriplesMap = new HashMap<String, DifferenceTriples>();
 
-        /**
+        /*
          * we build a queryPrefix quickly because this will be necessary for almost every subsequent query
          * that we will construct.
          */
@@ -167,12 +167,12 @@ public class QueryService
             queryPrefix += "PREFIX " + key + ": <" + parsedQuery.getPrefixes().get(key) + ">\n";
         }
 
-        /**
+        /*
          * we clone the query as to ensure that the original query object remains untouched
          */
         SPARQLQuery clonedQuery = parsedQuery.clone();
 
-        /**
+        /*
          * we loop over the blocks in the query, for every block the idea is:
          *  1. find out on which graph it operates (if none than it's the graph for the entire query
          *  2. remove all graph statements for the block
@@ -185,7 +185,7 @@ public class QueryService
                 // cast it, the updateblockstatement has functional support that will be handy later on
                 UpdateBlockStatement updateBlockStatement = (UpdateBlockStatement)statement;
 
-                /**
+                /*
                  * step 1. finding the graph
                  */
                 String originalGraph = updateBlockStatement.getGraph();
@@ -193,12 +193,12 @@ public class QueryService
                 if(originalGraph.isEmpty())
                     originalGraph = parsedQuery.getGraph();
 
-                /**
+                /*
                  * step 2. replacing all graph statements in the block
                  */
                 updateBlockStatement.replaceGraphStatements("");
 
-                /**
+                /*
                  * step 3. transforming it into a construct
                  */
                 String extractQuery = queryPrefix + "WITH <" + originalGraph + ">\n";
@@ -219,7 +219,7 @@ public class QueryService
 
                 extractQuery += "}";
 
-                /**
+                /*
                  * step 4. transforming the construct query in a set of triples, we will automatically
                  *         add the triples to the differenceTriples object for that graph in the map
                  */
@@ -232,7 +232,7 @@ public class QueryService
                 insertTriples = differenceTriplesMap.get(originalGraph).getAllInsertTriples();
                 deleteTriples = differenceTriplesMap.get(originalGraph).getAllDeleteTriples();
 
-                /**
+                /*
                  * TODO: make sure that the authentication headers are set and passed if Configuration has them
                  * for query user and pwd.
                  */
@@ -265,7 +265,7 @@ public class QueryService
          * 4. store the result of the last query in the effective deletes for that graph
          */
         for(String graph : differenceTriplesMap.keySet()) {
-            /**
+            /*
              * step 1. constructing the tmp insert query that will insert the potential deletes into a tmp graph
              */
             // first we try to get the delete triples for that graph
@@ -279,7 +279,8 @@ public class QueryService
             // first clear the graph
             HashMap<String, String> headers = new HashMap<String, String>();
             headers.put("Content-type", "application/sparql-update");
-            /**
+
+            /*
              * TODO set authentication headers if info is available in Configuration
              */
             this.sparqlService.postSPARQLResponse(Configuration.updateEndpoint, "with " + deleteGraph + " delete {?s ?p ?o} where {?s ?p ?o.}", headers);
@@ -293,12 +294,12 @@ public class QueryService
 
             tmpDeleteInsert += "}";
 
-            /**
+            /*
              * step 2. executing that query
              */
             this.sparqlService.postSPARQLResponse(Configuration.updateEndpoint,tmpDeleteInsert, headers);
 
-            /**
+            /*
              * step 3. constructing the union query
              */
             String unionQuery = "SELECT ?s ?p ?o WHERE { GRAPH <" + graph + "> { ?s ?p ?o . } .\n GRAPH " + deleteGraph + " { ?s ?p ?o . } .\n}";
@@ -308,13 +309,13 @@ public class QueryService
             String url = Configuration.queryEndpoint + "?query=" + URLEncoder.encode(unionQuery, "UTF-8");
             confirmedDeletes = this.sparqlService.getTriplesViaGet(url);
 
-            /**
+            /*
              * step 4. storing the result
              */
             differenceTriples.setEffectiveDeleteTriples(new HashSet<Triple>(confirmedDeletes));
         }
 
-        /**
+        /*
          * The effective inserts will be calculated in an analog fashion:
          * 1. constructing and insertquery
          * 2. executing it
@@ -322,7 +323,7 @@ public class QueryService
          * 4. store the result in the correct hash
          */
         for(String graph : differenceTriplesMap.keySet()) {
-            /**
+            /*
              * step 1. constructing the insert query
              */
             DifferenceTriples differenceTriples = differenceTriplesMap.get(graph);
@@ -346,15 +347,15 @@ public class QueryService
 
             tmpInsertInsert += "}";
 
-            /**
+            /*
              * step 2. executing tht query
              */
             this.sparqlService.postSPARQLResponse(Configuration.updateEndpoint, tmpInsertInsert, headers);
 
-            /**
+            /*
              * step 3. creating the difference query
              */
-            /**
+            /*
              * TODO I guess I should assume the graph to be mu.semte.ch/application, this should be the original query's
              * target graph!
              */
@@ -365,7 +366,7 @@ public class QueryService
             String url = Configuration.queryEndpoint + "?query=" + URLEncoder.encode(differenceQuery, "UTF-8");
             confirmedInserts = this.sparqlService.getTriplesViaGet(url);
 
-            /**
+            /*
              * step 4. storing the result
              */
             differenceTriples.setEffectiveInsertTriples(new HashSet<Triple>(confirmedInserts));
