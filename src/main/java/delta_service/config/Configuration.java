@@ -4,14 +4,14 @@ public class Configuration {
     /*
      * Describing the query endpoint
      */
-    public static String queryEndpoint = "http://localhost:8890/sparql";
+    public static String queryEndpoint = "http://dbold:8890/sparql";
     public static String queryUser=null;
     public static String queryPwd=null;
 
     /*
      * Describing the update endpoint
      */
-    public static String updateEndpoint = "http://localhost:8890/sparql";
+    public static String updateEndpoint = "http://dbold:8890/sparql";
     public static String updateUser=null;
     public static String updatePwd=null;
 
