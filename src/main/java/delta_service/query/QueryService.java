@@ -253,7 +253,13 @@ public class QueryService
             }
         }
 
-        /**
+        // if we shouldn't calculate the effective triples then just return what we have
+        if(!Configuration.calculateEffectives)
+        {
+            return differenceTriplesMap;
+        }
+
+        /*
          * Now that we have all potential inserts and deletes we still have to calculate the effective
          * versions of those sets. For this we will separate the logic in 2 different blocks, 1 for
          * deletes and 1 for insterts.
