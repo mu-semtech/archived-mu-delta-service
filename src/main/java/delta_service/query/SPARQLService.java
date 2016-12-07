@@ -121,7 +121,7 @@ public class SPARQLService
     }
 
     @SuppressWarnings("unchecked")
-    public String getSPARQLResponse(String url, Map<String,String> headers) throws MalformedURLException, IOException
+    public Response getSPARQLResponse(String url, Map<String,String> headers) throws MalformedURLException, IOException
     {
         URL u = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) u.openConnection();
@@ -160,11 +160,23 @@ public class SPARQLService
         {
             stringBuilder.append(line + "\n");
         }
-        return stringBuilder.toString();
+
+        connection.disconnect();
+
+        Response response = new Response();
+
+        response.responseText = stringBuilder.toString();
+        for(String header : connection.getHeaderFields().keySet())
+        {
+            // don't look at me, this is spring's fault!
+            if(header != null)response.responseHeaders.put(header, connection.getHeaderField(header));
+        }
+
+        return response;
     }
 
     @SuppressWarnings("unchecked")
-    public String postSPARQLResponse(String url, String query, Map<String, String> headers) throws MalformedURLException, IOException
+    public Response postSPARQLResponse(String url, String query, Map<String, String> headers) throws MalformedURLException, IOException
     {
         URL obj = new URL(url);
 
@@ -211,7 +223,19 @@ public class SPARQLService
         //print result
         System.out.println(response.toString());
 
-        return (response.toString());
+        con.disconnect();
+
+        Response toReturn = new Response();
+
+        toReturn.responseText = response.toString();
+
+        for(String header : con.getHeaderFields().keySet())
+        {
+            // don't look at me, this is spring's fault!
+            if(header != null)toReturn.responseHeaders.put(header, con.getHeaderField(header));
+        }
+
+        return toReturn;
     }
 
     /**

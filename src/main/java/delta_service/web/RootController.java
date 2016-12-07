@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import delta_service.config.Configuration;
 import delta_service.query.QueryInfo;
 import delta_service.query.QueryService;
+import delta_service.query.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -196,19 +198,33 @@ public class RootController {
             }
 
             // extract the response and remove all other info
-            String queryResponse = queryInfo.response;
-            this.queryService.processedQueries.remove(queryInfo);
+            String queryResponse = queryInfo.response.responseText;
+            this.queryService.getProcessedQueries().remove(queryInfo);
+
+            // setting the headers...
+            if(queryInfo.response.responseHeaders != null)
+            {
+                for(String header : queryInfo.response.responseHeaders.keySet())
+                {
+                    response.setHeader(header, queryInfo.response.responseHeaders.get(header));
+                }
+            }
 
             // and then return the result
-            return new ResponseEntity<String>(queryInfo.response, HttpStatus.OK);
+            return new ResponseEntity<String>(queryInfo.response.responseText, HttpStatus.OK);
         }
 
         /**
          * If we are dealing with a SELECT query we can just return the response as is...
          */
-        if(!parsedQuery.getType().equals(SPARQLQuery.Type.UPDATE))
+        if(!queryType.equals(SPARQLQuery.Type.UPDATE))
         {
-            String qrp = this.queryService.sparqlService.getSPARQLResponse(Configuration.queryEndpoint + "?query=" + URLEncoder.encode(queryString, "UTF-8"), headers);
+            Response sparqlResponse = this.queryService.sparqlService.getSPARQLResponse(Configuration.queryEndpoint + "?query=" + URLEncoder.encode(queryString, "UTF-8"), headers);
+            String qrp = sparqlResponse.responseText;
+            for(String header:sparqlResponse.responseHeaders.keySet())
+            {
+                response.setHeader(header, sparqlResponse.responseHeaders.get(header));
+            }
             return new ResponseEntity<String>(qrp, HttpStatus.OK);
         }
 

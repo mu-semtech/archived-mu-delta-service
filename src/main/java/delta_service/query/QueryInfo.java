@@ -17,7 +17,7 @@ public class QueryInfo {
     public String originalQuery;
     public Map<String, String> headers;
     public String endpoint;
-    public String response;
+    public Response response;
     public String id;
 
     public QueryInfo()

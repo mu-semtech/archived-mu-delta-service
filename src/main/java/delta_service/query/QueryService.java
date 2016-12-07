@@ -41,7 +41,7 @@ public class QueryService
         this.callBackService.addCallBackSet("effectiveDifferences");
     }
 
-    public String postSPARQLResponse(String location, String query, Map<String, String> headers) throws IOException
+    public Response postSPARQLResponse(String location, String query, Map<String, String> headers) throws IOException
     {
         return this.sparqlService.postSPARQLResponse(location, query, headers);
     }
