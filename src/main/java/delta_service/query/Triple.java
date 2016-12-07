@@ -147,7 +147,7 @@ public class Triple
             String suffix = this.objectString.substring(this.objectString.indexOf("@"), this.objectString.length());
             if(!body.startsWith("\""))
                 body = "\"" + body;
-            if(!body.endsWith("\""))
+            if(!body.substring(1, body.length()).endsWith("\""))
                 body = body + "\"";
             return body + suffix;
         }
@@ -158,6 +158,10 @@ public class Triple
             if(!toreturn.startsWith("\""))
                 toreturn = "\"" + toreturn;
             return toreturn;
+        }
+        if(objectType.equalsIgnoreCase("literal"))
+        {
+            return "\"" + objectString + "\"";
         }
         if(!toreturn.startsWith("<"))
             toreturn = "<" + toreturn;
