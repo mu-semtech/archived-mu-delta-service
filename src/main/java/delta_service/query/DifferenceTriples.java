@@ -83,7 +83,7 @@ public class DifferenceTriples
     {
         String jsonString = "";
 
-        jsonString += "{\"inserts\":[";
+        jsonString += "\"inserts\":[";
 
         for(Triple t : this.getAllInsertTriples())
         {
@@ -141,7 +141,7 @@ public class DifferenceTriples
             jsonString = jsonString.substring(0, jsonString.length() - 1);
         }
 
-        jsonString += "]}";
+        jsonString += "]";
 
         return jsonString;
     }
@@ -156,7 +156,7 @@ public class DifferenceTriples
     {
         String jsonString = "";
 
-        jsonString += "{\"inserts\":[";
+        jsonString += "\"inserts\":[";
 
         for(Triple t : this.getEffectiveInsertTriples())
         {
@@ -216,7 +216,7 @@ public class DifferenceTriples
             jsonString = jsonString.substring(0, jsonString.length() - 1);
         }
 
-        jsonString += "]}";
+        jsonString += "]";
 
         return jsonString;
     }

@@ -119,8 +119,8 @@ public class QueryService
             String effectiveJson = "{\"query\":\"" + URLEncoder.encode(queryInfo.originalQuery, "UTF-8") + "\", \"delta\":[";
 
             for (String g : diff.keySet()) {
-                potJson += "{\"graph\":\"" + g + "\",\"delta\":" + diff.get(g).getPotentialChangesAsJSON() + "},";
-                effectiveJson += "{\"graph\":\"" + g + "\",\"delta\":" + diff.get(g).getEffectiveChangesAsJSON() + "},";
+                potJson += "{\"type\":\"potential\",\"graph\":\"" + g + "\"," + diff.get(g).getPotentialChangesAsJSON() + "},";
+                effectiveJson += "{\"type\":\"effective\",\"graph\":\"" + g + "\"," + diff.get(g).getEffectiveChangesAsJSON() + "},";
             }
 
             if (!diff.keySet().isEmpty()) {
@@ -135,8 +135,8 @@ public class QueryService
             queryInfo.response = this.postSPARQLResponse(queryInfo.endpoint, queryInfo.originalQuery, queryInfo.headers);
 
             // 4. notify the callback endpoints
-            this.notifyCallBacks("effectiveDifferences", effectiveJson);
             this.notifyCallBacks("potentialDifferences", potJson);
+            this.notifyCallBacks("effectiveDifferences", effectiveJson);
 
             this.isProcessingUpdateQueries = false;
     }
