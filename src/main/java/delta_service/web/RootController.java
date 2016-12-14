@@ -116,7 +116,7 @@ public class RootController {
      * @return
      * @throws InvalidSPARQLException
      */
-  @RequestMapping(value = "/sparql", produces = {"application/sparql-results+xml", "application/sparql-results+json", "text/html", "text/csv"})
+  @RequestMapping(value = "/sparql", produces = {"application/sparql-results+xml", "application/sparql-results+json", "text/html", "text/csv", "*"})
   public ResponseEntity<String> preProcessQuery(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) String body) throws InvalidSPARQLException
   {
     try {
