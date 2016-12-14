@@ -50,8 +50,13 @@ public class CallBack
             HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 
             connection.setRequestMethod("POST");
-            connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty( "charset", "utf-8");
+            connection.setRequestProperty( "Content-Type", "application/json");
+            /*
+            TODO this is kind of bad practice but I am not sure why I set the 2 headers below
+            TODO so I have to find that out before I delete them
+             */
+//            connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+//            connection.setRequestProperty( "charset", "utf-8");
             connection.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
             connection.setInstanceFollowRedirects( false );
             connection.setUseCaches( false );
