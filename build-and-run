@@ -14,8 +14,4 @@ cd /usr/local/tomcat/bin
 
 sh startup.sh
 
-echo 'Keep running forever...'
-# actually this should monitor the tomcat process
-# that was started, not that hard but too much to
-# do now
-while true; do sleep 1000; done
+tail -f /usr/local/tomcat/logs/catalina.out
