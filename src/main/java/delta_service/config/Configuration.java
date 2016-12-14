@@ -4,7 +4,7 @@ public class Configuration {
     /*
      * Describing the query endpoint
      */
-    public static String queryEndpoint = "http://dn:8890/sparql";
+    public static String queryEndpoint = "http://db:8890/sparql";
     public static String queryUser=null;
     public static String queryPwd=null;
 
