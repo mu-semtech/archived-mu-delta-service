@@ -3,6 +3,7 @@ package delta_service.web;
 import SPARQLParser.SPARQL.InvalidSPARQLException;
 import SPARQLParser.SPARQL.SPARQLQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import delta_service.callback.CallBackConfiguration;
 import delta_service.config.Configuration;
 import delta_service.query.QueryInfo;
 import delta_service.query.QueryService;
@@ -19,6 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
@@ -41,6 +43,17 @@ public class RootController {
   @PostConstruct
   public void init()
   {
+      try {
+          ObjectMapper mapper = new ObjectMapper();
+          String filename = System.getenv("SUBSCRIBERSFILE");
+          CallBackConfiguration callBackConfiguration = mapper.readValue(new File(filename), CallBackConfiguration.class);
+          for(String callbackString : callBackConfiguration.getPotentials())
+              this.queryService.addCallBack("potentialDifferences", callbackString);
+          for(String callbackString : callBackConfiguration.getEffectives())
+              this.queryService.addCallBack("effectiveDifferences", callbackString);
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
   }
 
   /**
