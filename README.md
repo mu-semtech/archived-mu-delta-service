@@ -2,16 +2,25 @@
 The delta service can essentially be put in front of any SPARQL endpoint and will proxy calls to it. Then interested parties can subscribe to different forms of notifications about changes in the SPARQL endpoint.
 
 ## To be done
-* make the updates sequential
 * improve the internal triple model (it's a mess now)
-* make certain thing configurable (enpdoints, authorization, ...)
 * sort out the update notification format
+* make sure the credentials are used (config.properties)
+* updates should be sendable in the bodies if too big or in the settings
 
 ## Configuring
-[needs to be implemented]
+There are 2 configuratble parts for each a file has to be provided. 
+
+The first one is the location of the config.properties file for this microservice. This properties file states where the query and update endpoint are. There is also a flag to force the system to send updates in the body even when the query URL would not become too big.
+
+There is also a subscribers.json file in which the 'static' subscribers can be set to be automatically loaded. The location of this JSON file needs to be set with an environment variable.
+
+Environment variables for settings
+* config.properties CONFIGFILE
+* subscribers.json SUBSCRIBERSFILE
+
 
 ## Notifications
-To subscribe for notifications you can send a http request to the "/registerForPotentialDifferences" or the "/registerForEffectiveDifferences" route. The target of the callback should be identified in the body as follows:
+Subscribers can be set with the subscribers.json file (see above) or through the subscription endpoint as follows. To subscribe for notifications you can send a http request to the "/registerForPotentialDifferences" or the "/registerForEffectiveDifferences" route. The target of the callback should be identified in the body as follows:
 ```
 {
 "callback":"http://localhost:3000/print"
