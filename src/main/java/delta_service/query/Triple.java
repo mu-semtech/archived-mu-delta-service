@@ -12,6 +12,9 @@ import org.openrdf.model.Value;
  * TODO make this more representative of what a triple might be and support the different forms it may have
  *      in a more logical fashion (for instance the difference between a literal and a uri for the object
  *      support for types and languages...
+ *
+ *  TODO maybe I can introduce a new class called a term that consists of a String and a Type
+ *  TODO and then the subject and the predicate would be URI's by default
  */
 public class Triple
 {
