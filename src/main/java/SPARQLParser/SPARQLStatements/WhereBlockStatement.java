@@ -69,7 +69,7 @@ public class WhereBlockStatement extends BlockStatement
 
             // hooray we have a new inner block!
             if(iterator.peekNext().startsWith("{") || iterator.peekNext().toLowerCase().startsWith("graph")
-                    || iterator.peekNext().toLowerCase().startsWith("otpional")) {
+                    || iterator.peekNext().toLowerCase().startsWith("optional")) {
                 if(!block.trim().isEmpty()) {
                     statements.add(new SimpleStatement(block));
                 }
