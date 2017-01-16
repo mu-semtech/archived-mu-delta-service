@@ -35,7 +35,7 @@ public class ParenthesesBlock implements IStatement
     public ParenthesesBlock(String block, String graph)
     {
         this.statements.add(new SimpleStatement(block));
-        graph = graph;
+        this.graph = graph;
     }
 
     /**
