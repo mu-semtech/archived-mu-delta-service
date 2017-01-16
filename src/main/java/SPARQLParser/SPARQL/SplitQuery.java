@@ -72,6 +72,8 @@ public class SplitQuery implements Iterable<String>
 
         boolean inString = false;
 
+        boolean inStringLastWasSpecialChar = false; // to detect /" within a string (this will actually be ///"
+
         boolean inComments = false;
 
         boolean inURI = false;
@@ -117,6 +119,22 @@ public class SplitQuery implements Iterable<String>
             else
             {
                 if(inString) {
+                    int i = 0;
+                    if(((char)b) == '\\') {
+                        currentBuffer += ((char) b);
+                        inStringLastWasSpecialChar = true;
+                        continue;
+                    }
+                    if(inStringLastWasSpecialChar)
+                    {
+                        currentBuffer += ((char) b);
+                        inStringLastWasSpecialChar = false;
+                        continue;
+                    }
+
+                    // TODO this is a bad approach, I just put it here now as a fallback
+                    inStringLastWasSpecialChar = false;
+
                     if (((char) b) == '\"') {
                         currentBuffer += "\"";
                         currentBuffer = currentBuffer.trim();
