@@ -80,7 +80,7 @@ public class QueryService
     {
         if(this.updateQueries.size() > 0) {
             this.isProcessingUpdateQueries = true;
-            this.currentQuery = this.updateQueries.remove(); //get(0);
+            this.currentQuery = this.updateQueries.remove();
             try {
                 this.processUpdateQuery(this.currentQuery);
             }
@@ -240,7 +240,7 @@ public class QueryService
                  * TODO: make sure that the authentication headers are set and passed if Configuration has them
                  * for query user and pwd.
                  */
-                List<Triple> triples = this.sparqlService.getTriplesViaConstruct(Configuration.queryEndpoint + "?query=" + URLEncoder.encode(extractQuery, "UTF-8"));
+                List<Triple> triples = this.sparqlService.getTriplesViaConstruct(Configuration.getProperty("queryURL") + "?query=" + URLEncoder.encode(extractQuery, "UTF-8"));
 
                 if(updateBlockStatement.getUpdateType().equals(BlockStatement.BLOCKTYPE.INSERT))
                 {
@@ -293,7 +293,7 @@ public class QueryService
             /*
              * TODO set authentication headers if info is available in Configuration
              */
-            this.sparqlService.postSPARQLResponse(Configuration.updateEndpoint, "with " + deleteGraph + " delete {?s ?p ?o} where {?s ?p ?o.}", headers);
+            this.sparqlService.postSPARQLResponse(Configuration.getProperty("updateURL"), "with " + deleteGraph + " delete {?s ?p ?o} where {?s ?p ?o.}", headers);
 
             String tmpDeleteInsert = queryPrefix + "\n with " + deleteGraph + "\ninsert data\n{\n";
             for (Triple t : deleteTriples)
@@ -307,7 +307,7 @@ public class QueryService
             /*
              * step 2. executing that query
              */
-            this.sparqlService.postSPARQLResponse(Configuration.updateEndpoint,tmpDeleteInsert, headers);
+            this.sparqlService.postSPARQLResponse(Configuration.getProperty("updateURL"),tmpDeleteInsert, headers);
 
             /*
              * step 3. constructing the union query
@@ -316,7 +316,7 @@ public class QueryService
 
             List<Triple> confirmedDeletes = new ArrayList<Triple>();
 
-            String url = Configuration.queryEndpoint + "?query=" + URLEncoder.encode(unionQuery, "UTF-8");
+            String url = Configuration.getProperty("queryURL") + "?query=" + URLEncoder.encode(unionQuery, "UTF-8");
             confirmedDeletes = this.sparqlService.getTriplesViaGet(url);
 
             /*
@@ -346,7 +346,7 @@ public class QueryService
             // first clear the graph
             HashMap<String, String> headers = new HashMap<String, String>();
             headers.put("Content-type", "application/sparql-update");
-            this.sparqlService.postSPARQLResponse(Configuration.updateEndpoint, "with " + insertGraph + " delete {?s ?p ?o} where {?s ?p ?o.}", headers);
+            this.sparqlService.postSPARQLResponse(Configuration.getProperty("updateURL"), "with " + insertGraph + " delete {?s ?p ?o} where {?s ?p ?o.}", headers);
 
             String tmpInsertInsert = queryPrefix + "\n with " + insertGraph + "\ninsert data\n{\n";
             for (Triple t : insertTriples)
@@ -360,7 +360,7 @@ public class QueryService
             /*
              * step 2. executing tht query
              */
-            this.sparqlService.postSPARQLResponse(Configuration.updateEndpoint, tmpInsertInsert, headers);
+            this.sparqlService.postSPARQLResponse(Configuration.getProperty("updateURL"), tmpInsertInsert, headers);
 
             /*
              * step 3. creating the difference query
@@ -373,7 +373,7 @@ public class QueryService
 
             List<Triple> confirmedInserts = new ArrayList<Triple>();
 
-            String url = Configuration.queryEndpoint + "?query=" + URLEncoder.encode(differenceQuery, "UTF-8");
+            String url = Configuration.getProperty("queryURL") + "?query=" + URLEncoder.encode(differenceQuery, "UTF-8");
             confirmedInserts = this.sparqlService.getTriplesViaGet(url);
 
             /*

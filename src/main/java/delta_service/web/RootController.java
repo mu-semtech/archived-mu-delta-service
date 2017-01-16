@@ -179,7 +179,7 @@ public class RootController {
             // prepare the query object
             QueryInfo queryInfo = new QueryInfo();
             queryInfo.headers = headers;
-            queryInfo.endpoint = Configuration.updateEndpoint;
+            queryInfo.endpoint = Configuration.getProperty("updateURL");
             queryInfo.originalQuery = queryString;
             queryInfo.query = parsedQuery;
 
@@ -218,7 +218,7 @@ public class RootController {
          */
         if(!queryType.equals(SPARQLQuery.Type.UPDATE))
         {
-            Response sparqlResponse = this.queryService.sparqlService.getSPARQLResponse(Configuration.queryEndpoint + "?query=" + URLEncoder.encode(queryString, "UTF-8"), headers);
+            Response sparqlResponse = this.queryService.sparqlService.getSPARQLResponse(Configuration.getProperty("queryURL") + "?query=" + URLEncoder.encode(queryString, "UTF-8"), headers);
             String qrp = sparqlResponse.responseText;
             for(String header:sparqlResponse.responseHeaders.keySet())
             {
