@@ -97,7 +97,7 @@ public class DescribeBlock implements IStatement
             this.selectModifier += iterator.next();
         }
 
-        if(iterator.peekNext().toLowerCase().equals("reduce"))
+        if(iterator.peekNext().toLowerCase().equals("reduced"))
         {
             this.selectModifier += iterator.next();
         }
