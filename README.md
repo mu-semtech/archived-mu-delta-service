@@ -1,6 +1,28 @@
 # Delta Service
 The delta service can essentially be put in front of any SPARQL endpoint and will proxy calls to it. Then interested parties can subscribe to different forms of notifications about changes in the SPARQL endpoint.
 
+## Using the Delta Service
+
+### Add the config files
+The standard setup for the configuration files is in the ./config/Delta Service directory. You can copy the config.properties and the contributors.json files from this repository to that location. Add the desired subscribers to the subscribers file and that is it!
+
+### Changing the docker-compose
+First at the delta entry as follows (adjust if necessary), this assumes that you want to publish the Delta Service as a SPARQL endpoint on port 8890 so your micro-services can hook into changes that are introduced from outside of the system:
+```
+  delta:
+    image: semtech/delta-service:beta-0.6
+	ports:
+	 - "8890:8890"
+    volumes:
+      - ./config/delta-service:/config
+    environment:
+      CONFIGFILE: "/config/config.properties"
+      SUBSCRIBERSFILE: "/config/subscribers.json"
+    links:
+      - db:db
+```
+And then for all micro-services for which you want to know the delta's just replace the db:database link with delta:database.
+
 ## To be done
 * improve the internal triple model (it's a mess now)
 * sort out the update notification format
