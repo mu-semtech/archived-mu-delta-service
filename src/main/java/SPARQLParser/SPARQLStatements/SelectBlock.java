@@ -16,11 +16,11 @@ public class SelectBlock implements IStatement
     private String selectClause = "";
     private Set<String> unknowns = new HashSet<String>();
     private List<IStatement> statements = new ArrayList<IStatement>();
-    private String selectModifier = ""; // normally this is DISTINCT or REDUCE
+    private String selectModifier = ""; // normally this is DISTINCT or REDUCED
     private boolean inBlock = false; // denotes whether or not this select is a subselect (and thus has to be
-                                     // placed between a '{' and a '}'
+    // placed between a '{' and a '}'
     private List<String> solutionModifier = new ArrayList<String>();
-    private String graph = null;
+    private List<String> graphs = new ArrayList<String>();
 
     public SelectBlock(SplitQuery.SplitQueryIterator iterator, boolean inBlock) throws InvalidSPARQLException
     {
@@ -28,7 +28,7 @@ public class SelectBlock implements IStatement
         this.inBlock = inBlock;
     }
 
-    private SelectBlock()
+    public SelectBlock()
     {
 
     }
@@ -50,12 +50,14 @@ public class SelectBlock implements IStatement
             throw new InvalidSPARQLException("Invalid SPARQL: on line " + iterator.getCurrentLine() + " near: " + iterator.getPrevious());
         }
 
+        // https://www.w3.org/TR/rdf-sparql-query/#modDistinct
         if(iterator.peekNext().toLowerCase().equals("distinct"))
         {
             this.selectModifier += iterator.next();
         }
 
-        if(iterator.peekNext().toLowerCase().equals("reduce"))
+        // https://www.w3.org/TR/rdf-sparql-query/#modReduced
+        if(iterator.peekNext().toLowerCase().equals("reduced"))
         {
             this.selectModifier += iterator.next();
         }
@@ -85,7 +87,8 @@ public class SelectBlock implements IStatement
             {
                 throw new InvalidSPARQLException("Invalid SPARQL at line " + iterator.getCurrentLine() + " not a valid graph URI: " + graph);
             }
-            this.graph = graph.substring(1, graph.length() - 1);
+            this.graphs.clear();
+            this.graphs.add(graph.substring(1, graph.length() - 1));
         }
 
         // the from has passed so now we MUST have a where
@@ -203,6 +206,10 @@ public class SelectBlock implements IStatement
         if(this.inBlock) toreturn += "{";
 
         toreturn += "SELECT " + this.selectClause + "\n";
+        for(String g : this.graphs)
+        {
+            if(!g.isEmpty() && !g.equals(""))toreturn += "FROM <" + g + ">\n";
+        }
         toreturn += "WHERE\n{\n";
 
         for(IStatement statement : statements)
@@ -264,12 +271,29 @@ public class SelectBlock implements IStatement
         this.solutionModifier = solutionModifier;
     }
 
-    public String getGraph() {
-        return graph;
+    public String getGraph()
+    {
+        return null;
+    }
+
+    public List<String> getGraphs() {
+        return graphs;
+    }
+
+    public void setGraphs(List<String> graphs)
+    {
+        this.graphs = graphs;
     }
 
     public void setGraph(String graph) {
-        this.graph = graph;
+        this.graphs.clear(); this.graphs.add(graph);
+    }
+
+    public void addGraph(String graph)
+    {
+        if(graph == null || graph.isEmpty() || graph.equals(""))
+            return;
+        if(!this.graphs.contains(graph))this.graphs.add(graph);
     }
 
     public StatementType getType() {
@@ -282,7 +306,9 @@ public class SelectBlock implements IStatement
 
         clone.setSelectClause(this.selectClause);
         clone.setSelectModifier(this.selectModifier);
-        clone.setGraph(this.graph);
+        List<String> clonedGraphs = new ArrayList<String>();
+        for(String g:graphs)clonedGraphs.add(g);
+        clone.setGraphs(clonedGraphs);
         clone.setInBlock(this.inBlock);
         for(String u : this.unknowns)
             clone.getUnknowns().add(u);
@@ -305,7 +331,8 @@ public class SelectBlock implements IStatement
      */
     public void replaceGraphStatements(String newGraph)
     {
-        this.graph = newGraph;
+        this.graphs.clear();
+        if(newGraph != null &&!newGraph.isEmpty() && newGraph != "")this.graphs.add(newGraph);
 
         for(IStatement s : this.statements)
             s.replaceGraphStatements(newGraph);
@@ -321,8 +348,15 @@ public class SelectBlock implements IStatement
      */
     public void replaceGraphStatements(String oldGraph, String newGraph)
     {
-        if(this.graph.equals(oldGraph))
-            this.graph = newGraph;
+        if(this.graphs.contains("oldGraph"))
+        {
+            this.graphs.remove(oldGraph);
+            if(newGraph != null &&!newGraph.isEmpty() && newGraph != "")this.graphs.add(newGraph);
+        }
+        if(oldGraph == null || oldGraph.isEmpty() || oldGraph.equals(""))
+        {
+            if(newGraph != null &&!newGraph.isEmpty() && newGraph != "")this.graphs.add(newGraph);
+        }
 
         for(IStatement s : this.statements)
             s.replaceGraphStatements(oldGraph, newGraph);
