@@ -305,7 +305,11 @@ public class SPARQLService
                     Triple triple = new Triple();
                     triple.setSubject(uri);
                     triple.setPredicate(pred);
-                    triple.setObjectString((String) oMap.get("value"));
+                    // TODO this is a hack because the Jackson Library on it's own decides to replaces
+                    // TODO all "\\n" sequences with "\n". The reason why I can do this relatively safely
+                    // TODO is because virtuoso (did not check OWLIM for that matter) does not allow newlines
+                    // TODO in a literal
+                    triple.setObjectString(((String) oMap.get("value")).replace("\n", "\\n"));
                     triple.setObjectType((String) oMap.get("type"));
                     if (oMap.containsKey("lang")) {
                         triple.setObjectString((String) oMap.get("value") + "@" + (String) oMap.get("lang"));
