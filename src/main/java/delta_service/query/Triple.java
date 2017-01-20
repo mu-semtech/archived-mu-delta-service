@@ -147,24 +147,25 @@ public class Triple
         if(toreturn.contains("@"))
         {
             String body = this.objectString.substring(0, this.objectString.indexOf("@"));
+            if(body.startsWith("\""))
+                body = body.substring(1, body.length());
+            if(body.endsWith("\""))
+                body = body.substring(0, body.length() - 1);
+            body = body.replace("\"", "\\\"");
             String suffix = this.objectString.substring(this.objectString.indexOf("@"), this.objectString.length());
-            if(!body.startsWith("\""))
-                body = "\"" + body;
-            if(!body.substring(1, body.length()).endsWith("\""))
-                body = body + "\"";
-            return body + suffix;
+
+            return "\"" + body  + "\"" + suffix;
         }
-        if(toreturn.endsWith("\"") || toreturn.startsWith("\""))
+        if(toreturn.endsWith("\"") && toreturn.startsWith("\""))
         {
-            if(!toreturn.endsWith("\""))
-                toreturn += "\"";
-            if(!toreturn.startsWith("\""))
-                toreturn = "\"" + toreturn;
-            return toreturn;
+            toreturn = toreturn.substring(1, toreturn.length() - 1);
+            toreturn = toreturn.substring(1, toreturn.length());
+            toreturn = toreturn.replace("\"", "\\\"");
+            return "\"" + toreturn + "\"";
         }
         if(objectType.equalsIgnoreCase("literal"))
         {
-            return "\"" + objectString + "\"";
+            return "\"" + objectString.replace("\"", "\\\"") + "\"";
         }
         if(!toreturn.startsWith("<"))
             toreturn = "<" + toreturn;
