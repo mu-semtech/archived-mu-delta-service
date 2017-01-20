@@ -141,12 +141,6 @@ public class RootController {
 
         if (request.getParameterMap().containsKey("query")) {
             queryString = request.getParameter("query");
-            try {
-                queryString = URLDecoder.decode(queryString, "UTF-8");
-            }catch(Exception e)
-            {
-                e.printStackTrace();
-            }
         }
         else
         {
