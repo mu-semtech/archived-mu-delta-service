@@ -121,13 +121,18 @@ public class SplitQuery implements Iterable<String>
                 if(inString) {
                     int i = 0;
                     if(((char)b) == '\\') {
-                        currentBuffer += ((char) b);
+                        //currentBuffer += ((char) b);
                         inStringLastWasSpecialChar = true;
                         continue;
                     }
                     if(inStringLastWasSpecialChar)
                     {
-                        currentBuffer += ((char) b);
+                        if(((char)b) == '\"')
+                            currentBuffer += "\\" + ((char) b);
+                        else
+//                            currentBuffer += '\\' + ((char)b);
+                            currentBuffer += "\\\\" + ((char) b);
+
                         inStringLastWasSpecialChar = false;
                         continue;
                     }
