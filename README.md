@@ -10,7 +10,7 @@ The standard setup for the configuration files is in the ./config/Delta Service 
 First at the delta entry as follows (adjust if necessary), this assumes that you want to publish the Delta Service as a SPARQL endpoint on port 8890 so your micro-services can hook into changes that are introduced from outside of the system:
 ```
   delta:
-    image: semtech/delta-service:beta-0.6
+    image: semtech/mu-delta-service:beta-0.7
 	ports:
 	 - "8890:8890"
     volumes:
