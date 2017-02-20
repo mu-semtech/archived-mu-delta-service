@@ -305,14 +305,27 @@ public class SPARQLService
                     Triple triple = new Triple();
                     triple.setSubject(uri);
                     triple.setPredicate(pred);
-                    // TODO this is a hack because the Jackson Library on it's own decides to replaces
-                    // TODO all "\\n" sequences with "\n". The reason why I can do this relatively safely
-                    // TODO is because virtuoso (did not check OWLIM for that matter) does not allow newlines
-                    // TODO in a literal
-                    triple.setObjectString(((String) oMap.get("value")).replace("\n", "\\n"));
-                    triple.setObjectType((String) oMap.get("type"));
+
+                    // check if the thing we get out is an integer/float/double
+                    if((oMap.get("value")).getClass().equals(Integer.class) ||
+                            (oMap.get("value")).getClass().equals(Float.class) ||
+                            (oMap.get("value")).getClass().equals(Double.class)) {
+                        triple.setObjectString("" + oMap.get("value"));
+                    }
+                    else {
+                        // TODO this is a hack because the Jackson Library on it's own decides to replaces
+                        // TODO all "\\n" sequences with "\n". The reason why I can do this relatively safely
+                        // TODO is because virtuoso (did not check OWLIM for that matter) does not allow newlines
+                        // TODO in a literal
+                        triple.setObjectString(((String) oMap.get("value")).replace("\n", "\\n"));
+                    }
+                    if(((String) oMap.get("type")).equalsIgnoreCase("uri"))
+                        triple.setObjectIsURI(true);
                     if (oMap.containsKey("lang")) {
-                        triple.setObjectString((String) oMap.get("value") + "@" + (String) oMap.get("lang"));
+                        triple.setObjectLanguage((String) oMap.get("lang"));
+                    }
+                    if (oMap.containsKey("datatype")) {
+                        triple.setObjectType((String) oMap.get("datatype"));
                     }
                     triples.add(triple);
                 }

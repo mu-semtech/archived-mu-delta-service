@@ -87,24 +87,21 @@ public class DifferenceTriples
 
         for(Triple t : this.getAllInsertTriples())
         {
-            String type = "uri";
-            if(t.getObjectType().toLowerCase().contains("string") ||
-                    t.getObjectType().toLowerCase().contains("literal"))
-            {
-                type = "literal";
-            }
-            String oString = t.getObjectString();
-            if(oString.startsWith("\""))
-                oString = oString.substring(1, oString.length());
-            if(oString.length() > 3)
-                if(oString.substring(0, oString.length() - 2).endsWith("@"))
-                    oString = oString.substring(0, oString.length() - 3);
-            if(oString.endsWith("\""))
-                oString = oString.substring(0, oString.length() - 1);
+            String type = "literal";
+            if(t.isObjectIsURI())type = "uri";
+
             jsonString += "{";
             jsonString += "\"s\":{\"value\":\"" + t.getSubject() + "\", \"type\":\"uri\"},";
             jsonString += "\"p\":{\"value\":\"" +  t.getPredicate() + "\", \"type\":\"uri\"},";
-            jsonString += "\"o\":{\"value\":\"" + oString + "\", \"type\":\"" + type + "\"}},";
+            jsonString += "\"o\":{\"value\":\"" + t.getObjectString() + "\", \"type\":\"" + type + "\"";
+
+            if(t.getObjectLanguage() != null && !t.getObjectLanguage().isEmpty())
+                jsonString += ", \"lang\":\"" + t.getObjectLanguage() + "\"";
+
+            if(t.getObjectType() != null && !t.getObjectType().isEmpty())
+                jsonString += ", \"datatype\":\"" + t.getObjectType() + "\"";
+
+            jsonString += "}},";
         }
 
         if(!this.getAllInsertTriples().isEmpty())
