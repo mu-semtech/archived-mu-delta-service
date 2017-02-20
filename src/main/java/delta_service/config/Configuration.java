@@ -8,6 +8,13 @@ import java.util.Properties;
 
 public class Configuration {
     /*
+     * Logging etc
+     */
+    public static boolean logAllQueries = true;
+    public static boolean logImportantQueries = true;
+    public static boolean logDeltaResults = true;
+
+    /*
      * Describing the query endpoint
      */
     public static String queryEndpoint = "http://db:8890/sparql";

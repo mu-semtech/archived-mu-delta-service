@@ -9,6 +9,8 @@ import delta_service.callback.CallBack;
 import delta_service.callback.CallBackService;
 import delta_service.callback.CallBackSetNotFoundException;
 import delta_service.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,6 +37,8 @@ public class QueryService
     public QueryInfo getCurrentQuery(){return this.currentQuery;}
 
     private boolean isProcessingUpdateQueries = false;
+
+    private static final Logger log = LoggerFactory.getLogger(QueryService.class);
 
     public QueryService() {
         this.sparqlService = new SPARQLService();
@@ -131,6 +135,12 @@ public class QueryService
             potJson += "]}";
             effectiveJson += "]}";
 
+        if(Configuration.logDeltaResults)
+        {
+            log.info("Delta effectives:\n" + effectiveJson);
+            log.info("Delta potential:\n" + potJson);
+        }
+
             // 3. perform the actual query on the DB
             queryInfo.response = this.postSPARQLResponse(queryInfo.endpoint, queryInfo.originalQuery, queryInfo.headers);
 
@@ -223,6 +233,18 @@ public class QueryService
 
                 extractQuery += "}";
 
+                if(Configuration.logImportantQueries)
+                {
+                    if(updateBlockStatement.getUpdateType().equals(BlockStatement.BLOCKTYPE.INSERT))
+                    {
+                        log.info("Query to extract insert block:\n" + extractQuery);
+                    }
+                    else
+                    {
+                        log.info("Query to extract delete block:\n" + extractQuery);
+                    }
+                }
+
                 /*
                  * step 4. transforming the construct query in a set of triples, we will automatically
                  *         add the triples to the differenceTriples object for that graph in the map
@@ -297,12 +319,14 @@ public class QueryService
 
             String tmpDeleteInsert = queryPrefix + "\n with " + deleteGraph + "\ninsert data\n{\n";
             for (Triple t : deleteTriples)
-                if (t.getObjectType().endsWith(".org/2001/XMLSchema#string>"))
-                    tmpDeleteInsert += "<" + t.getSubject().substring(0, t.getSubject().length()) + "> <" + t.getPredicate() + "> " + t.getObjectAsString() + " .\n";
-                else
-                    tmpDeleteInsert += "<" + t.getSubject().substring(0, t.getSubject().length()) + "> <" + t.getPredicate() + "> " + t.getObjectAsString() + " .\n";
+                tmpDeleteInsert += "<" + t.getSubject().substring(0, t.getSubject().length()) + "> <" + t.getPredicate() + "> " + t.getObjectAsString() + " .\n";
 
             tmpDeleteInsert += "}";
+
+            if(Configuration.logAllQueries)
+            {
+                log.info("Inserting delete triples in temp graph with query:\n" + tmpDeleteInsert);
+            }
 
             /*
              * step 2. executing that query
@@ -313,6 +337,11 @@ public class QueryService
              * step 3. constructing the union query
              */
             String unionQuery = "SELECT ?s ?p ?o WHERE { GRAPH <" + graph + "> { ?s ?p ?o . } .\n GRAPH " + deleteGraph + " { ?s ?p ?o . } .\n}";
+
+            if(Configuration.logAllQueries)
+            {
+                log.info("Getting all EFFECTIVE delete triples with:\n" + unionQuery);
+            }
 
             List<Triple> confirmedDeletes = new ArrayList<Triple>();
 
@@ -350,12 +379,14 @@ public class QueryService
 
             String tmpInsertInsert = queryPrefix + "\n with " + insertGraph + "\ninsert data\n{\n";
             for (Triple t : insertTriples)
-                if (t.getObjectType().endsWith(".org/2001/XMLSchema#string>"))
-                    tmpInsertInsert += "<" + t.getSubject().substring(0, t.getSubject().length()) + "> <" + t.getPredicate() + "> " + t.getObjectAsString() + " .\n";
-                else
-                    tmpInsertInsert += "<" + t.getSubject().substring(0, t.getSubject().length()) + "> <" + t.getPredicate() + "> " + t.getObjectAsString() + " .\n";
+                tmpInsertInsert += "<" + t.getSubject().substring(0, t.getSubject().length()) + "> <" + t.getPredicate() + "> " + t.getObjectAsString() + " .\n";
 
             tmpInsertInsert += "}";
+
+            if(Configuration.logAllQueries)
+            {
+                log.info("Inserting insert triples in temp graph with query:\n" + tmpInsertInsert);
+            }
 
             /*
              * step 2. executing tht query
@@ -370,6 +401,11 @@ public class QueryService
              * target graph!
              */
             String differenceQuery = "SELECT ?s ?p ?o WHERE {graph " + insertGraph + " {?s ?p ?o.}.\nminus\n{\ngraph <" + "http://mu.semte.ch/application" + "> {?s ?p ?o.}.}\n}";
+
+            if(Configuration.logAllQueries)
+            {
+                log.info("Getting all EFFECTIVE insert triples with:\n" + differenceQuery);
+            }
 
             List<Triple> confirmedInserts = new ArrayList<Triple>();
 
