@@ -115,6 +115,20 @@ public class SplitQuery implements Iterable<String>
                     inComments = true;
                     continue;
                 }
+                if(((char)b) == '@' && currentBuffer.isEmpty())
+                {
+                    currentBuffer = splitQuery.lastElement();
+                    splitQuery.remove(splitQuery.size() - 1);
+                    currentBuffer = currentBuffer.trim() + "@";
+                    continue;
+                }
+                if(((char)b) == '^' && currentBuffer.isEmpty())
+                {
+                    currentBuffer = splitQuery.lastElement();
+                    splitQuery.remove(splitQuery.size() - 1);
+                    currentBuffer = currentBuffer.trim() + "^";
+                    continue;
+                }
             }
             else
             {
