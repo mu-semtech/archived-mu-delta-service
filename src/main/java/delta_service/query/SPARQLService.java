@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
@@ -204,7 +205,14 @@ public class SPARQLService
         // Send post request
         con.setDoOutput(true);
         DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(query);
+        if(headers.containsKey("content-type") && ((String)headers.get("content-type")).equalsIgnoreCase("application/x-www-form-urlencoded"))
+        {
+            // should url encode the query and assign it
+            wr.writeBytes("query=" + URLEncoder.encode(query, "UTF-8"));
+        }
+        else {
+            wr.writeBytes(query);
+        }
         wr.flush();
         wr.close();
 
