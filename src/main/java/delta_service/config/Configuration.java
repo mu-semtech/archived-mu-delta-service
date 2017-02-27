@@ -1,7 +1,5 @@
 package delta_service.config;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;

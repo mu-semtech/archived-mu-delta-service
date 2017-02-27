@@ -2,13 +2,6 @@ package delta_service.query;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.org.apache.regexp.internal.RE;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.Update;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.http.HTTPRepository;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
