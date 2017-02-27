@@ -28,7 +28,7 @@ public abstract class BlockStatement implements IStatement
      * the supported types of block statments
      */
     public enum BLOCKTYPE {
-        INSERT, DELETE, WHERE, SELECT
+        INSERT, DELETE, DELETE_INSERT, WHERE, SELECT
     }
 
     // the type

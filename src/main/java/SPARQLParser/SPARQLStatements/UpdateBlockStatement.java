@@ -77,13 +77,74 @@ public class UpdateBlockStatement extends BlockStatement
                     statements.add(new SimpleStatement(block));
                 }
 
+                if(iterator.hasNext() && iterator.peekNext().toLowerCase().startsWith("insert"))
+                {
+                    // insert block after delete, handle it
+                    String insertPart = iterator.next();
+                    iterator.breakOff(insertPart.substring(0, 6));
+
+                    // if this is not a delete block then barf...
+                    if(!this.type.name().equalsIgnoreCase("delete"))
+                    {
+                        throw new InvalidSPARQLException("Invalid SPARQL on line: " + iterator.getCurrentLine() + " expected WHERE clause after " + this.type.name() + " clause around " + iterator.getPrevious());
+                    }
+
+                    block = "";
+
+                    // we will put the content of this block up until this point into a new
+                    // delete update block
+                    String deleteContents = "";
+                    for(IStatement s : this.getStatements())
+                    {
+                        deleteContents += "\n" + s.toString();
+                    }
+                    UpdateBlockStatement deleteStatement = new UpdateBlockStatement(BLOCKTYPE.DELETE, deleteContents, this.getGraph());
+
+                    // now we clear the contents of this block, effectively putting everything in the delete block
+                    this.statements.clear();
+                    this.statements.add(deleteStatement);
+
+                    // we change the type of this block to the combined DELETE_INSERT
+                    // this will flag at the end of parsing this block to put everything but the first
+                    // statement in an updateblock, we then still need to insert the wereblock
+                    this.type = BLOCKTYPE.DELETE_INSERT;
+
+                    // the next part now should be {
+                    String insertBracket = iterator.next();
+                    if(!insertBracket.startsWith("{"))
+                    {
+                        throw new InvalidSPARQLException("Invalid SPARQL on line: " + iterator.getCurrentLine() + " expected WHERE clause after " + this.type.name() + " clause around " + iterator.getPrevious());
+                    }
+                    iterator.breakOff("{");
+
+                    // process as further as normally
+                    continue;
+                }
+
+                // at this point we can check if this.type == DELETE_INSERT, if yes then we will put
+                // all statements[1-END] in a separate INSERT block
+                if(this.type.equals(BLOCKTYPE.DELETE_INSERT))
+                {
+                    String insertContents = "";
+                    for(IStatement s: this.statements.subList(1, this.statements.size()))
+                    {
+                        insertContents += "\n" + s.toString();
+                    }
+                    UpdateBlockStatement insertBlock = new UpdateBlockStatement(BLOCKTYPE.INSERT, insertContents, this.getGraph());
+                    IStatement deleteBlock = this.statements.get(0);
+                    this.statements.clear();
+                    this.statements.add(deleteBlock);
+                    this.statements.add(insertBlock);
+                }
+
                 if(this.getUnknowns().size() > 0)
                 {
-                    if(!iterator.peekNext().toLowerCase().startsWith("where"))
+                    if(!iterator.peekNext().toLowerCase().startsWith("where") )
                     {
                         throw new InvalidSPARQLException("Invalid SPARQL on line: " + iterator.getCurrentLine() + " expected WHERE clause after " + this.type.name() + " clause around " + iterator.getPrevious());
                     }
                 }
+
 
                 if(iterator.hasNext() && iterator.peekNext().toLowerCase().startsWith("where"))
                 {
@@ -117,20 +178,25 @@ public class UpdateBlockStatement extends BlockStatement
     public String toString()
     {
         String toReturn = "";
-        if(type == BLOCKTYPE.INSERT) {
-            toReturn += "INSERT \n{";
+        if(type == BLOCKTYPE.DELETE_INSERT)
+        {
+            toReturn += this.statements.get(0);
+            toReturn += this.statements.get(1);
         }
         else {
-            toReturn += "DELETE \n{";
-        }
+            if (type == BLOCKTYPE.INSERT) {
+                toReturn += "INSERT \n{";
+            } else {
+                toReturn += "DELETE \n{";
+            }
 
-        for(IStatement statement:statements)
-        {
-            toReturn += statement.toString() + "\n";
-        }
-        toReturn = toReturn.substring(0, toReturn.length());
+            for (IStatement statement : statements) {
+                toReturn += statement.toString() + "\n";
+            }
+            toReturn = toReturn.substring(0, toReturn.length());
 
-        toReturn += "\n}";
+            toReturn += "\n}";
+        }
 
         if(this.whereBlock != null)
         {

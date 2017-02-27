@@ -94,7 +94,14 @@ public class WhereBlockStatement extends BlockStatement
 
         for(IStatement statement:statements)
         {
-            toReturn += statement.toString() + "\n";
+            if(statement.getClass().isInstance(ParenthesesBlock.class))
+            {
+                toReturn += "{\n" + statement.toString() + "}\n";
+            }
+            else
+            {
+                toReturn += statement.toString() + "\n";
+            }
         }
         toReturn = toReturn.substring(0, toReturn.length());
 

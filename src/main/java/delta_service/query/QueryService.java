@@ -187,6 +187,47 @@ public class QueryService
         SPARQLQuery clonedQuery = parsedQuery.clone();
 
         /*
+         * here we will split DELETE_INSERT blocks in to 2 separate blocks of DELETE and INSERT parts
+         */
+        UpdateBlockStatement statementToReplace = null;
+        UpdateBlockStatement deleteStatement = null;
+        UpdateBlockStatement insertStatement = null;
+
+        do {
+            statementToReplace = null;
+            for(IStatement s : clonedQuery.getStatements()) {
+                if (s.getType().equals(IStatement.StatementType.UPDATEBLOCK)) {
+                    // cast it, the updateblockstatement has functional support that will be handy later on
+                    statementToReplace = (UpdateBlockStatement) s;
+                    if (statementToReplace.getUpdateType().equals(BlockStatement.BLOCKTYPE.DELETE_INSERT)) {
+                        // lets split it and put 2 at that location
+                        if (statementToReplace.getStatements().get(0).getType().equals(IStatement.StatementType.UPDATEBLOCK)) {
+                            deleteStatement = (UpdateBlockStatement) statementToReplace.getStatements().get(0);
+                            deleteStatement.setWhereBlock(statementToReplace.getWhereBlock().clone());
+                        }
+
+                        if (statementToReplace.getStatements().get(1).getType().equals(IStatement.StatementType.UPDATEBLOCK)) {
+                            insertStatement = (UpdateBlockStatement) statementToReplace.getStatements().get(1);
+                            insertStatement.setWhereBlock(statementToReplace.getWhereBlock().clone());
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        statementToReplace = null;
+                    }
+                }
+            }
+            if(statementToReplace != null)
+            {
+                int i = clonedQuery.getStatements().indexOf(statementToReplace);
+                clonedQuery.getStatements().remove(statementToReplace);
+                clonedQuery.getStatements().add(i, deleteStatement);
+                clonedQuery.getStatements().add(i + 1, insertStatement);
+            }
+        } while (statementToReplace != null);
+
+        /*
          * we loop over the blocks in the query, for every block the idea is:
          *  1. find out on which graph it operates (if none than it's the graph for the entire query
          *  2. remove all graph statements for the block
