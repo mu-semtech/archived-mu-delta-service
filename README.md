@@ -30,7 +30,7 @@ And then for all micro-services for which you want to know the delta's just repl
 * updates should be sendable in the bodies if too big or in the settings
 
 ## Configuring
-There are 2 configuratble parts for each a file has to be provided. 
+There are 2 configuratble parts for each a file has to be provided.
 
 The first one is the location of the config.properties file for this microservice. This properties file states where the query and update endpoint are. There is also a flag to force the system to send updates in the body even when the query URL would not become too big.
 
@@ -39,6 +39,21 @@ There is also a subscribers.json file in which the 'static' subscribers can be s
 Environment variables for settings
 * config.properties CONFIGFILE
 * subscribers.json SUBSCRIBERSFILE
+
+In *subscribers.json* you enumerate for both potentials and effectives subscribers by specifying the list of URL's to update to. So the delta service will simply post to those URLs when required. For example:
+
+**subscribers.json**
+```
+{
+  "potentials":[
+    "http://push-service/update",
+    "http://initdaemon/process_delta"
+  ],
+  "effectives":[
+    "http://initdaemon/process_delta"
+  ]
+}
+```
 
 
 ## Notifications
@@ -51,7 +66,21 @@ Subscribers can be set with the subscribers.json file (see above) or through the
 
 The callbacks will be notified with a HTTP request that has a body like this:
 ```
-[{"graph":"http://graph1","delta":{"inserts":[{"o":"object","p":"predicate","s":"subject"}], "deletes":[]}}]
+[
+  {
+    "graph": "http://graph1",
+    "delta": {
+      "inserts": [
+        {
+          "o": "object",
+          "p": "predicate",
+          "s": "subject"
+        }
+      ],
+      "deletes": []
+    }
+  }
+]
 ```
 
 ## Different types of notifications
@@ -70,14 +99,48 @@ insert
 ```
 It is not unlikely that the effective and potential delta for this operation would be:
 ```
-{"graph":"http://graph1", "delta":{"inserts":[{"s":"http://uri1","p":"http://predicate1","o":"http://object1"}],"deletes":[]}
+{
+  "graph": "http://graph1",
+  "delta": {
+    "inserts": [
+      {
+        "s": "http://uri1",
+        "p": "http://predicate1",
+        "o": "http://object1"
+      }
+    ],
+    "deletes": [
+
+    ]
+  }
+}
 ```
 The second time this query is executed however (unless someone deletes the above triple of course) the potential differences are still:
 ```
-{"graph":"http://graph1", "delta":{"inserts":[{"s":"http://uri1","p":"http://predicate1","o":"http://object1"}],"deletes":[]}
+{
+  "graph": "http://graph1",
+  "delta": {
+    "inserts": [
+      {
+        "s": "http://uri1",
+        "p": "http://predicate1",
+        "o": "http://object1"
+      }
+    ],
+    "deletes": [
+
+    ]
+  }
+}
 ```
 but the effective differences would be:
 ```
-{"graph":"http://graph1", "delta":{"inserts":[],"deletes":[]}
+{
+  "graph": "http://graph1",
+  "delta": {
+    "inserts": [],
+    "deletes": []
+  }
+}
 ```
 To register you can send a HTTP request to the "/registerForPotentialDifferences" route.
