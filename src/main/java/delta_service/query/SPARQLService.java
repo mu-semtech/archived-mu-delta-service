@@ -222,8 +222,6 @@ public class SPARQLService
         in.close();
 
         //print result
-        System.out.println(response.toString());
-
         con.disconnect();
 
         Response toReturn = new Response();

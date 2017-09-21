@@ -1,5 +1,8 @@
 package delta_service.callback;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -18,6 +21,8 @@ public class CallBack
 {
     // the location to which the call back needs to be made
     private String url;
+
+    private static final Logger log = LoggerFactory.getLogger(CallBack.class);
 
     /**
      * default getter for the url
@@ -71,17 +76,17 @@ public class CallBack
         }
         catch (ProtocolException e)
         {
-            System.out.println("[!] Caught protocol exception, stack trace:");
+            log.error("[!] Caught protocol exception, stack trace:");
             e.printStackTrace();
         }
         catch(MalformedURLException e)
         {
-            System.out.println("[!] Malformed URL: " + this.url);
+            log.error("[!] Malformed URL: " + this.url);
             e.printStackTrace();
         }
         catch(IOException e)
         {
-            System.out.println("[!] Could not connect...");
+            log.error("[!] Could not connect...");
             e.printStackTrace();
         }
     }

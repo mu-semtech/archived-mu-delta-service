@@ -43,7 +43,6 @@ public class Configuration {
             try
             {
                 String filename = System.getenv("CONFIGFILE");
-                System.out.println(filename);
                 input = new FileInputStream(filename);
                 Configuration.properties = new Properties();
                 Configuration.properties.load(input);

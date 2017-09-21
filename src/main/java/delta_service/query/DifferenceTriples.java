@@ -160,8 +160,6 @@ public class DifferenceTriples
             {
                 type = "literal";
             }
-            System.out.println(t.getObjectAsString());
-            System.out.println(t.getObjectType());
             String oString = t.getObjectString();
             if(oString.startsWith("\""))
                 oString = oString.substring(1, oString.length());
