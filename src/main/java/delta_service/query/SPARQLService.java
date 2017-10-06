@@ -316,7 +316,15 @@ public class SPARQLService
                         // TODO all "\\n" sequences with "\n". The reason why I can do this relatively safely
                         // TODO is because virtuoso (did not check OWLIM for that matter) does not allow newlines
                         // TODO in a literal
-                        triple.setObjectString(((String) oMap.get("value")).replace("\n", "\\n"));
+                        CharSequence unescaped = "\"";
+                        CharSequence escaped = "\\\"";
+                        triple.setObjectString(((String) oMap.get("value"))
+                                .replace("\n", "\\n")
+                                .replace(unescaped, escaped)
+                                .replace("\'", "\'")
+                                .replace("\r", "\\r")
+                                .replace("\t", "\\t")
+                        );
                     }
                     if(((String) oMap.get("type")).equalsIgnoreCase("uri"))
                         triple.setObjectIsURI(true);
