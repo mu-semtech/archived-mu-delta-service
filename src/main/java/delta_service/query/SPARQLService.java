@@ -305,8 +305,10 @@ public class SPARQLService
                     triple.setSubject(uri);
                     triple.setPredicate(pred);
 
-                    // check if the thing we get out is an integer/float/double
-                    if((oMap.get("value")).getClass().equals(Integer.class) ||
+                    // check if the thing we get out is an short/integer/long/float/double
+                    if((oMap.get("value")).getClass().equals(Short.class) ||
+                            (oMap.get("value")).getClass().equals(Integer.class) ||
+                            (oMap.get("value")).getClass().equals(Long.class) ||
                             (oMap.get("value")).getClass().equals(Float.class) ||
                             (oMap.get("value")).getClass().equals(Double.class)) {
                         triple.setObjectString("" + oMap.get("value"));
