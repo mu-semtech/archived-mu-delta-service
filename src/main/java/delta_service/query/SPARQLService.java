@@ -3,10 +3,7 @@ package delta_service.query;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -326,6 +323,111 @@ public class SPARQLService
                                 .replace("\'", "\'")
                                 .replace("\r", "\\r")
                                 .replace("\t", "\\t")
+                        );
+                    }
+                    if(((String) oMap.get("type")).equalsIgnoreCase("uri"))
+                        triple.setObjectIsURI(true);
+                    if (oMap.containsKey("lang")) {
+                        triple.setObjectLanguage((String) oMap.get("lang"));
+                    }
+                    if (oMap.containsKey("datatype")) {
+                        triple.setObjectType((String) oMap.get("datatype"));
+                    }
+                    triples.add(triple);
+                }
+            }
+
+        }
+        return triples;
+    }
+
+
+    /**
+     * this sends a POST request to the given URL and produces a list of triple objects
+     * that match the query.
+     *
+     * @param url endpoint of your DB
+     * @param query query=#{encodedQuery}
+     * @return a list of triples that were returned by the SPARQL endpoint
+     * @throws MalformedURLException if the URL cannot be passed to the constructor of a java.util.URL object
+     * @throws IOException if the connection to the SPARQL enpoint cannot be opened
+     */
+    @SuppressWarnings("unchecked")
+    public List<Triple> getTriplesViaPostConstruct(String url, String query) throws MalformedURLException, IOException
+    {
+
+        URL u = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+
+        // uncomment this if you want to write output to this url
+        connection.setDoOutput(true);
+        // just want to do an HTTP POST here
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Accept", "application/json");
+
+        // Writing the post data to the HTTP request body
+        BufferedWriter httpRequestBodyWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+        httpRequestBodyWriter.write(query);
+        httpRequestBodyWriter.close();
+
+        // give it 15 seconds to respond
+        connection.setReadTimeout(15*1000);
+
+        BufferedReader reader = null;
+        StringBuilder stringBuilder;
+
+        // read the output from the server
+        reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        stringBuilder = new StringBuilder();
+
+        String line = null;
+        while ((line = reader.readLine()) != null)
+        {
+            stringBuilder.append(line + "\n");
+        }
+
+        connection.disconnect();
+
+        String jsonString = stringBuilder.toString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> jsonMap = mapper.readValue(jsonString, Map.class);
+
+        List<Triple> triples = new ArrayList<Triple>();
+
+        for(String uri : jsonMap.keySet())
+        {
+            Map<String, Object> poMap = (Map<String, Object>)jsonMap.get(uri);
+            for(String pred : poMap.keySet())
+            {
+                List<Map<String, Object>> oMapList = (List<Map<String, Object>>) poMap.get(pred);
+                for(Object oMapObject : oMapList.toArray()) {
+                    Map<String, Object> oMap = (Map<String, Object>)oMapObject;
+                    Triple triple = new Triple();
+                    triple.setSubject(uri);
+                    triple.setPredicate(pred);
+
+                    // check if the thing we get out is an short/integer/long/float/double
+                    if((oMap.get("value")).getClass().equals(Short.class) ||
+                        (oMap.get("value")).getClass().equals(Integer.class) ||
+                        (oMap.get("value")).getClass().equals(Long.class) ||
+                        (oMap.get("value")).getClass().equals(Float.class) ||
+                        (oMap.get("value")).getClass().equals(Double.class)) {
+                        triple.setObjectString("" + oMap.get("value"));
+                    }
+                    else {
+                        // TODO this is a hack because the Jackson Library on it's own decides to replaces
+                        // TODO all "\\n" sequences with "\n". The reason why I can do this relatively safely
+                        // TODO is because virtuoso (did not check OWLIM for that matter) does not allow newlines
+                        // TODO in a literal
+                        CharSequence unescaped = "\"";
+                        CharSequence escaped = "\\\"";
+                        triple.setObjectString(((String) oMap.get("value"))
+                            .replace("\n", "\\n")
+                            .replace(unescaped, escaped)
+                            .replace("\'", "\'")
+                            .replace("\r", "\\r")
+                            .replace("\t", "\\t")
                         );
                     }
                     if(((String) oMap.get("type")).equalsIgnoreCase("uri"))
