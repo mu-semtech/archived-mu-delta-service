@@ -303,7 +303,12 @@ public class QueryService
                  * TODO: make sure that the authentication headers are set and passed if Configuration has them
                  * for query user and pwd.
                  */
-                List<Triple> triples = this.sparqlService.getTriplesViaConstruct(Configuration.getProperty("queryURL") + "?query=" + URLEncoder.encode(extractQuery, "UTF-8"));
+
+                // Uncomment to use GET
+                //List<Triple> triples = this.sparqlService.getTriplesViaConstruct(Configuration.getProperty("queryURL") + "?query=" + URLEncoder.encode(extractQuery, "UTF-8"));
+
+                // Uncomment to use POST
+                List<Triple> triples = this.sparqlService.getTriplesViaPostConstruct(Configuration.getProperty("queryURL"), "query=" + URLEncoder.encode(extractQuery, "UTF-8"));
 
                 if(updateBlockStatement.getUpdateType().equals(BlockStatement.BLOCKTYPE.INSERT))
                 {
