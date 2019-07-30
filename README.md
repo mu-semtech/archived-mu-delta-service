@@ -1,3 +1,6 @@
+# Archived
+This service has been archived. The current version of the delta service, the delta-notifier can be found [here](https://github.com/mu-semtech/delta-notifier).
+
 # Delta Service
 The delta service can essentially be put in front of any SPARQL endpoint and will proxy calls to it. Then interested parties can subscribe to different forms of notifications about changes in the SPARQL endpoint.
 
