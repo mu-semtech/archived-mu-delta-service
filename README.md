@@ -1,4 +1,4 @@
-# Archived
+# Deprecated
 This service has been archived. The current version of the delta service, the delta-notifier can be found [here](https://github.com/mu-semtech/delta-notifier).
 
 # Delta Service
